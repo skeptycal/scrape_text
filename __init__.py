@@ -4,8 +4,8 @@ Do What I Tell You!
 https://www.github.com/scraper
 
 # *#########################################################################* #
-Scraper uses *Requests* and *Beautiful Soup* to parse html and send alerts
-based on preset conditions. These conditions include:
+Scraper uses *Requests* and *Beautiful Soup* to parse html and send text
+messages and alerts based on preset conditions. These conditions include:
 
     * Document Changes
     * Content Parse Results
