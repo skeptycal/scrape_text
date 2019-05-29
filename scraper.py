@@ -1,4 +1,6 @@
-# scrape.py
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# # scrape.py
 import json
 import os
 import sys
