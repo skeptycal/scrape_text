@@ -6,6 +6,7 @@ import os
 import sys
 from datetime import datetime
 from typing import Any, Dict, List
+from collections import Counter, deque
 
 # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 # do not use python's built in html parser before python 3.2.2
@@ -23,68 +24,32 @@ from bs4 import BeautifulSoup
 # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 # do not use python's built in html parser before python 3.2.2
 DEFAULT_PARSER: str = ''
+XML: bool = False
 try:  # use <lxml> for speed (HTML and/or XML) (VERY fast)
-    import lxml
+    import lxml as parser
     DEFAULT_PARSER = 'lxml'
+    XML = True
 except:
     try:  # use <html5lib> to match browser closely (VERY slow)
-        import html5lib
+        import html5lib as parser
         DEFAULT_PARSER = 'html5lib'
     except:  # Python's built-in html parser
+        import html.parser as parser
         DEFAULT_PARSER = 'html.parser'
 
-# <lxml> is the ONLY supported XML parser
-DEFAULT_XML: str = ''
-try:
-    import lxml
-    DEFAULT_XML = 'lxml-xml'
-except:
-    pass
 # *#########################################################################* #
 
 sch = BlockingScheduler()
-CWD: str = os.getcwd()
-SCRIPT_PATH: str = CWD + "/sentMessage.scpt"
+SCRIPT_PATH: str = os.getcwd() + "/sentMessage.scpt"
 url: str = ''
 script_text: str = ''
 default_cell_number: str = ''
 current_number: str = ''
 
 
-class Contact_List:
-    def __init__(self):
-        self.contacts = []
-
-    def __repr__(self):
-        return json.dumps(self)
-
-    def add_contact(self, name="-", phonenumber="-", address="-"):
-        new_contact = Contact(name, phonenumber, address)
-        self.contacts.append(new_contact)
-        return new_contact
-
-    def save_to_file(self):
-        with open("contact_list.json", 'w') as f:
-            f.write(str(self.contacts))
-
-
-class Contact:
-    def __init__(self, name="-", phonenumber="-", address="-"):
-        self.name = name
-        self.phonenumber = phonenumber
-        self.address = address
-
-    def __repr__(self):
-        return json.dumps({"name": self.name, "phonenumber": self.phonenumber, "address": self.address})
-
-
-def test_contacts():
-
-    contact_list = Contact_List()
-
-    ted = contact_list.add_contact("Ted", "+000000000", "Somewhere")
-    joe = contact_list.add_contact("Joe", "+555555555", "Somewhere Else")
-
+class Contact_List(list):
+    joe = Contact("Joe", "+555555555", "Somewhere Else")
+    contact_list = Contact_List([ted, joe])
     contact_list.save_to_file()
 
     with open('list.txt') as p:
@@ -99,23 +64,76 @@ def get_default_cell_number() -> str:
     return default_cell_number
 
 
-def get_url_content(url: str) -> bytes:
-    """ Return bytes containing contents from the given url. """
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.content
-    else:
-        return b''
+class WebPageSet(deque[WebPage]):
+    DEFAULT_WEBPAGESET_SIZE = 2000  # maximum number of pages
+    # TODO this should be 'maximum size' ... and check it's own size
+
+    def __init__(self, iterable, maxlen, check_links=True, image_storage=''):
+        if not maxlen or maxlen < 2:
+            maxlen = cls.DEFAULT_WEBPAGESET_SIZE
+        self.check_links = check_links
+        self.store = True if image_storage else False
+        self.image_storage = image_storage
+        super().__init__(iterable, maxlen)
+
+    def count(self):
+        """ count tags, emails, ... whatever from the entire set """
+        pass
+
+    def common(self):
+        """ find items that this pageset has in common. """
+        pass
+
+    def size_check(self):
+        print(self.__sizeof__())
 
 
-def soup_match(url: str,
-               tag_name: str,
-               attrs_pass: Dict[Any, Any],
-               parser_pass: str = DEFAULT_PARSER) -> List[Any]:
-    """ Find matching tags from url. """
-    html = get_url_content(url)
-    soup = BeautifulSoup(html, features=DEFAULT_PARSER)
-    return soup.findAll(name=tag_name, attrs=attrs_pass)
+class WebPage(requests.Response):
+
+    def __init__(self, url):
+        super().__init__()
+        self.url: str = url
+        self.dirty: bool = true
+        self.last_status: int = 0
+        self.tags = {}
+        self.auth: Tuple[str, str] = ('user', 'pass')
+        # >>> r = requests.get('https://api.github.com/user', auth=('user', 'pass'))
+
+    def get_url_content(self, url: str) -> str:
+        """ Return decoded contents from <url> using default parameters. """
+        self = requests.get(url)
+        self.history.append()
+        self.last_status = self.status_code
+        if self.last_status == 200:
+            return self.text
+        else:
+            return ''
+
+    def tag_find(self,
+                 tag_name: str,
+                 attrs_pass: Dict[Any, Any],
+                 parser_pass: str = DEFAULT_PARSER) -> List[Any]:
+        """ Find matching tags from url. """
+        soup = BeautifulSoup(self.text, features=DEFAULT_PARSER)
+        return soup.findAll(name=tag_name, attrs=attrs_pass)
+
+    def tag_list(self, tag_name: str):
+        if self.dirty:
+            self.tags = Counter(self.text)
+        return self.tags
+
+    def to_markdown():
+        pass
+
+    def to_json(self):
+        return json.dumps(self.text)
+
+    def stats(self):
+        pass
+
+    def soup(self):
+        pass
+        # return BeautifulSoup()
 
 
 def send_text(cell_number: str, message: str, Verbose: bool = False) -> int:
@@ -124,6 +142,7 @@ def send_text(cell_number: str, message: str, Verbose: bool = False) -> int:
     script_text = "osascript {} {} '{}'".format(SCRIPT_PATH,
                                                 cell_number, message)
     try:
+        print('send test: ', script_text)
         result = os.system(script_text)
     except:
         result = 42
@@ -136,9 +155,9 @@ def send_text(cell_number: str, message: str, Verbose: bool = False) -> int:
     return result
 
 
-def main():
+def main_test():
 
-    url = 'https://www.indeed.com/jobs?q=web%20developer&l=Denver%2C%20CO&vjk=0c0f7c56b3d79b4c'
+    url = 'https://www.indeed.com/jobs?q=python&l=Remote'
     matches = soup_match(url, tag_name='div', attrs_pass={'class': 'title'})
     print(type(matches))
     for match in matches:
@@ -153,10 +172,10 @@ def main():
             break
 
 
-if __name__ == "__main__":
-    # print('Default Parser: ', DEFAULT_PARSER) # test
+def main():
+    print('Default Parser: ', DEFAULT_PARSER)  # test
     TEST_STATUS: bool = False
-    default_cell_number = '13616488216'
+    default_cell_number = '13616488261'
     current_cell_number = get_default_cell_number()
     if len(sys.argv) > 1:
         result = send_text(default_cell_number,
@@ -169,4 +188,7 @@ if __name__ == "__main__":
         result = send_text(cell_number=test_cell_number,
                            message=message_text, Verbose=TEST_STATUS)
         print('Text result: ', result)
-        # main()
+
+
+if __name__ == "__main__":
+    main()

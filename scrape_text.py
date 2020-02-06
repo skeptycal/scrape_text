@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 from typing import Any, Dict, List
 
-# https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+# * per https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 # do not use python's built in html parser before python 3.2.2
 # use <lxml> for speed (HTML and/or XML)
 #   - <lxml> is the ONLY supported XML parser
