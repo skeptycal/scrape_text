@@ -38,7 +38,7 @@ http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 # *#########################################################################* #
 
 __author__ = "Michael Treanor (skeptycal@gmail.com)"
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __copyright__ = "Copyright (c) 2019 Michael Treanor"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
