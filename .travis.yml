@@ -1,3 +1,5 @@
+# @format
+
 # Travis CI scripts (python, php)
 # Python script (other languages are at the end.)
 language: python
@@ -5,6 +7,7 @@ python:
   # - "2.7"
   - "3.5"
   - "3.6"
+  - "3.8"
 
   # PyPy versions
   - "pypy3.5"
