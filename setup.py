@@ -15,27 +15,15 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = "text_colors"
-DESCRIPTION = "The obligatory ANSI text colors implementation."
-KEYWORDS_LIST = "ANSI color terminal iterm2 linux macos cli colorful rainbow"
+NAME = "implore"
+DESCRIPTION = "An even more desperate way to make requests for Humans."
+KEYWORDS_LIST = "requests html tag browser text message terminal iterm2 linux macos cli unicorn"
 URL = "https://github.com/skeptycal/"
 EMAIL = "skeptycal@gmail.com"
 AUTHOR = "Michael Treanor"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.8.3"
+VERSION = "0.0.8"
 README_FILENAME = "README.md"
-
-SCRIPTS_LIST = ["text_colors.py"]
-
-# What packages are required for this module to be executed?
-REQUIRED = [
-    # 'requests', 'maya', 'records',
-]
-
-# What packages are optional?
-EXTRAS = {
-    # 'fancy feature': ['django'],
-}
 
 PACKAGE_DATA = {
     # If any package contains *.txt or *.rst files, include them:
